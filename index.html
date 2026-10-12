@@ -6,6 +6,12 @@
 <title>GT Vision Sensor & C-Mount Calculator</title>
 
 <style>
+
+:root{
+    --gt-red:#BC2B2B;
+    --gt-red-dark:#A62424;
+}
+
 body{
     font-family:Arial,sans-serif;
     background:#f4f7f9;
@@ -24,7 +30,13 @@ body{
 
 h1{
     text-align:center;
-    color:#333;
+    color:var(--gt-red);
+    margin-bottom:10px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#666;
     margin-bottom:25px;
 }
 
@@ -47,17 +59,17 @@ select{
     border-radius:6px;
     border:1px solid #ccc;
     font-size:15px;
+    background:#fff;
 }
 
-/* GT Vision Button Styling */
 button{
     margin-top:20px;
     width:100%;
     padding:14px;
     background:linear-gradient(
         180deg,
-        #00A3E0 0%,
-        #0088BD 100%
+        var(--gt-red) 0%,
+        var(--gt-red-dark) 100%
     );
     color:white;
     border:none;
@@ -65,13 +77,18 @@ button{
     font-size:16px;
     font-weight:600;
     cursor:pointer;
-    box-shadow:0 3px 8px rgba(0,163,224,0.35);
+    box-shadow:0 3px 8px rgba(188,43,43,0.35);
     transition:all 0.2s ease;
 }
 
 button:hover{
     transform:translateY(-1px);
-    box-shadow:0 5px 12px rgba(0,163,224,0.45);
+    box-shadow:0 5px 12px rgba(188,43,43,0.45);
+    background:linear-gradient(
+        180deg,
+        #C93232 0%,
+        #BC2B2B 100%
+    );
 }
 
 button:active{
@@ -108,7 +125,7 @@ button:active{
     margin-top:15px;
     font-size:20px;
     font-weight:bold;
-    color:#333;
+    color:var(--gt-red);
 }
 
 svg{
@@ -117,6 +134,15 @@ svg{
     display:block;
     margin:auto;
 }
+
+@media(max-width:700px){
+
+    .controls{
+        grid-template-columns:1fr;
+    }
+
+}
+
 </style>
 </head>
 
@@ -124,12 +150,17 @@ svg{
 
 <div class="container">
 
-<h1>GT Vision Sensor & C-Mount Calculator</h1>
+<h1>GT Vision Sensor &amp; C-Mount Calculator</h1>
+
+<p class="subtitle">
+Select a camera sensor and C-mount adapter to evaluate image circle compatibility and vignetting risk.
+</p>
 
 <div class="controls">
 
     <div>
-        <label>Sensor Size</label>
+
+        <label>Camera Sensor</label>
 
         <select id="sensor">
             <option value="3.68,2.76">1/4"</option>
@@ -142,9 +173,11 @@ svg{
             <option value="13.2,8.8">4/3"</option>
             <option value="17.3,13.0">APS-C</option>
         </select>
+
     </div>
 
     <div>
+
         <label>C-Mount Adapter</label>
 
         <select id="cmount">
@@ -155,21 +188,31 @@ svg{
             <option value="12.7" selected>0.7x</option>
             <option value="16">1.0x</option>
         </select>
+
     </div>
 
 </div>
 
-<button onclick="calculate()">Calculate Compatibility</button>
+<button onclick="calculate()">
+Calculate Compatibility
+</button>
 
 <div class="results">
 
     <div class="statusRow">
+
         <div id="light" class="light"></div>
-        <div id="statusText"></div>
+
+        <div id="statusText">
+            Excellent Coverage
+        </div>
+
     </div>
 
     <div id="diag" class="resultLine"></div>
+
     <div id="coverage" class="resultLine"></div>
+
     <div id="recommend" class="recommend"></div>
 
 </div>
@@ -189,6 +232,7 @@ svg{
     </text>
 
     <!-- Image Circle -->
+
     <circle
         id="imageCircle"
         cx="250"
@@ -199,14 +243,15 @@ svg{
         stroke-width="4">
     </circle>
 
-    <!-- Sensor -->
+    <!-- Sensor Rectangle -->
+
     <rect
         id="sensorRect"
         x="175"
         y="210"
         width="150"
         height="100"
-        fill="#28a74555"
+        fill="#28a74566"
         stroke="#28a745"
         stroke-width="3">
     </rect>
@@ -218,12 +263,12 @@ svg{
 <script>
 
 const mounts = [
-    {name:"0.35x", circle:4.8},
-    {name:"0.45x", circle:6},
-    {name:"0.5x", circle:8},
-    {name:"0.63x", circle:11},
-    {name:"0.7x", circle:12.7},
-    {name:"1.0x", circle:16}
+    {name:"0.35x",circle:4.8},
+    {name:"0.45x",circle:6},
+    {name:"0.5x",circle:8},
+    {name:"0.63x",circle:11},
+    {name:"0.7x",circle:12.7},
+    {name:"1.0x",circle:16}
 ];
 
 function recommendMount(diagonal){
@@ -274,17 +319,20 @@ function calculate(){
         fill = "#d4edda";
         status = "Excellent Coverage";
 
-    } else if (coverage >= 100){
+    }
+    else if(coverage >= 100){
 
         colour = "#ffc107";
         fill = "#fff3cd";
         status = "Borderline Coverage";
 
-    } else {
+    }
+    else{
 
         colour = "#dc3545";
         fill = "#f8d7da";
         status = "Vignetting Risk";
+
     }
 
     document.getElementById("light")
@@ -316,60 +364,27 @@ function calculate(){
     document.getElementById("svgStatus")
         .setAttribute("fill", colour);
 
-    const circle =
+    const imageCircleSvg =
         document.getElementById("imageCircle");
 
-    circle.setAttribute("fill", fill);
-    circle.setAttribute("stroke", colour);
+    imageCircleSvg.setAttribute(
+        "fill",
+        fill
+    );
+
+    imageCircleSvg.setAttribute(
+        "stroke",
+        colour
+    );
 
     const sensorRect =
         document.getElementById("sensorRect");
 
-    sensorRect.setAttribute("fill", colour + "66");
-    sensorRect.setAttribute("stroke", colour);
-
-    /*
-    Scale sensor relative to selected
-    image circle diameter.
-
-    When the sensor is too large,
-    the rectangle extends outside
-    the circle, clearly indicating
-    vignetting risk.
-    */
-
-    const pxPerMM = 360 / imageCircle;
-
-    const width =
-        sensorWidth * pxPerMM;
-
-    const height =
-        sensorHeight * pxPerMM;
-
     sensorRect.setAttribute(
-        "width",
-        width
+        "fill",
+        colour + "66"
     );
 
     sensorRect.setAttribute(
-        "height",
-        height
-    );
-
-    sensorRect.setAttribute(
-        "x",
-        250 - width / 2
-    );
-
-    sensorRect.setAttribute(
-        "y",
-        270 - height / 2
-    );
-}
-
-calculate();
-
-</script>
-
-</body>
-</html>
+        "stroke",
+        colour
